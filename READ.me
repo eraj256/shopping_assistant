@@ -1,0 +1,55 @@
+🛒 CartScout - AI-Driven Shopping Assistant Backend
+Welcome to the CartScout backend system. This project is a hybrid, highly optimized e-commerce engine designed to provide sub-millisecond product filtering, automated rule-based review summaries, smart product recommendations, and an intelligent Groq Llama 3.1 AI chatbot with strict guardrails and Roman Urdu support.
+
+🏗️ System Architecture & Workflow
+The architecture is built using a hybrid pipeline approach. Instead of sending every request directly to the AI, local Python rules intercept basic actions to eliminate unnecessary API usage and slash latency down to 0ms for general queries.
+
+                       ┌─────────────────────────┐
+                       │    User Input/Query     │
+                       └────────────┬────────────┘
+                                    │
+                                    ▼
+                     /─────────────────────────────\
+                    <  Is Empty or Blank Space?     > ───[Yes]──► [Return Prompt Alert]
+                     \─────────────────────────────/
+                                    │ [No]
+                                    ▼
+                     /─────────────────────────────\
+                    <   Is it a Short Greeting?     > ───[Yes]──► [Local Greeting Reply]
+                     \─────────────────────────────/              (Instant / 0 API Cost)
+                                    │ [No]
+                                    ▼
+                     /─────────────────────────────\
+                    <   Is it a Forbidden Topic?   > ───[Yes]──► [Guardrail Rejection]
+                     \─────────────────────────────/              (Blocked Locally)
+                                    │ [No]
+                                    ▼
+                     /─────────────────────────────\
+                    <  Exact/Partial Match in DB?  > ───[Yes]──► [Local Product Card]
+                     \─────────────────────────────/              (Fast Dictionary Lookup)
+                                    │ [No]
+                                    ▼
+                     ┌─────────────────────────────┐
+                     │  Groq Llama 3.1 AI Engine   │ ───► [Context-Aware Chat Response]
+                     └─────────────────────────────┘       (Bilingual Roman Urdu/English)
+🚀 Core Modules & Features
+1. Hybrid Chatbot Core (ProfessionalChatbot)
+Local Caching & Indexing: Pre-indexes product data on startup by lowercasing names, brands, and tags into a dictionary layout for O(1) direct lookups.
+Smart Interceptors: Blocks forbidden non-shopping categories (Politics, IPL, Religion, Weather, News) instantly using a local keyword engine.
+Cost Saver Engine: Instantly recognizes short variations of greetings (hi, hey, salam, heyyy) locally, preventing costly Groq LLM API hits.
+Bilingual Memory: Maintains contextual history while explicitly adapting to Roman Urdu if the user prompts in it, carefully filtering out Devanagari/Hindi scripts.
+
+2. Fast Review Summarizer (Review Analytics)
+Set Intersection Scoring: Uses Python high-speed sets (& operator) to score review tokens locally against broad groups of POSITIVE_WORDS and NEGATIVE_WORDS.
+Dynamic Verdict Allocation: Determines overall recommendations (e.g., Highly Recommended, Mixed Reviews) through real-time ratio calculations.
+Fallback Buffer: If a product contains zero negative content, the engine seamlessly extracts neutral sentiments to fill out consumer reviews responsibly.
+
+3. Data & Utility Engine (Product Utilities)
+Absolute Pathing: Resolves products.json file pointers cleanly to suppress "File Not Found" errors regardless of working directories.
+Jaccard-like Recommendations: Recommends alternative products within matching categories by evaluating intersecting string tag sets.
+
+🛠️ Tech Stack & Dependencies
+Language: Python 3.10+
+Core SDK: groq (Llama-3.1-8b-instant model)
+Configuration: python-dotenv
+File Format: JSON
